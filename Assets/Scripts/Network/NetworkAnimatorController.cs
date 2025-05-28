@@ -1,7 +1,7 @@
 using UnityEngine;
 using Fusion;
 
-namespace Class3
+namespace Network
 {
     [RequireComponent(typeof(NetworkPlayerController), typeof(NetworkMecanimAnimator))]
     public class NetworkAnimatorController : NetworkBehaviour

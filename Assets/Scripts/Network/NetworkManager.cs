@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
+using Common;
+using Player;
 
-namespace Class3
+namespace Network
 {
     public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, INetworkRunnerCallbacks
     {
@@ -20,7 +22,7 @@ namespace Class3
         public event Action<string> OnNewPlayerJoined;
         public event Action<string> OnJoinedPlayerLeft;
 
-        public NetworkPlayerController LocalPlayer { get; set; }
+        public NetworkPlayerSetup LocalPlayer { get; set; }
 
 
         async void Start ()
@@ -135,6 +137,8 @@ namespace Class3
 
             float horizontalInput = Input.GetAxis("Horizontal");
             float verticalInput = Input.GetAxis("Vertical");
+            bool isSprinting = Input.GetKey(KeyCode.LeftShift);
+            bool isJumping = Input.GetKeyDown(KeyCode.Space);
 
             networkInput.LookDirection = LocalPlayer.GetNormalizedLookDirection();
 
@@ -148,8 +152,15 @@ namespace Class3
             else if (horizontalInput > 0f)
                 networkInput.AddInput(NetworkInputType.MoveRight);
 
+            if (isSprinting)
+                networkInput.AddInput(NetworkInputType.Sprint);
+
+            if (isJumping)
+                networkInput.AddInput(NetworkInputType.Jump);
+
             input.Set(networkInput);
         }
+
 
         void INetworkRunnerCallbacks.OnInputMissing (NetworkRunner runner, PlayerRef player, NetworkInput input) { }
         void INetworkRunnerCallbacks.OnConnectRequest (NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }

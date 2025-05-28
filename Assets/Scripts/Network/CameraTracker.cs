@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Class3
+namespace Network
 {
     public class CameraTracker : MonoBehaviour
     {

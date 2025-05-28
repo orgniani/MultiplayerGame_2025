@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Fusion;
 
-namespace Class3
+namespace Network
 {
     [RequireComponent(typeof(NetworkCharacterController))]
     public class NetworkPlayerController : NetworkBehaviour
@@ -28,7 +28,7 @@ namespace Class3
             if (!Object.HasInputAuthority)
                 return;
 
-            NetworkManager.Instance.LocalPlayer = this;
+            //NetworkManager.Instance.LocalPlayer = this;
             cameraTracker.SetFollowTarget(cameraTarget);
         }
 

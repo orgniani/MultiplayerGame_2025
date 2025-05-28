@@ -613,11 +613,11 @@ PrefabInstance:
       objectReference: {fileID: 542414456}
     - target: {fileID: 487846020086074125, guid: d29334e569ff13b4c8b32a0e14d38c93, type: 3}
       propertyPath: 'playerPrefab.RawGuidValue.Array.data[0]'
-      value: -6562818586036483987
+      value: 7274209928947014444
       objectReference: {fileID: 0}
     - target: {fileID: 487846020086074125, guid: d29334e569ff13b4c8b32a0e14d38c93, type: 3}
       propertyPath: 'playerPrefab.RawGuidValue.Array.data[1]'
-      value: -3843762367904948184
+      value: 3613787265008308505
       objectReference: {fileID: 0}
     - target: {fileID: 927949090783355123, guid: d29334e569ff13b4c8b32a0e14d38c93, type: 3}
       propertyPath: m_Name

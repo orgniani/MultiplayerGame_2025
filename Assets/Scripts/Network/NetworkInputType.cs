@@ -1,10 +1,12 @@
-namespace Class3
+namespace Network
 {
     public enum NetworkInputType
     {
         MoveForward,
         MoveBackwards,
         MoveLeft,
-        MoveRight
+        MoveRight,
+        Sprint,
+        Jump
     }
 }

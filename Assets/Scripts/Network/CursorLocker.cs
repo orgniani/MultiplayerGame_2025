@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Class3
+namespace Network
 {
     public class CursorLocker : MonoBehaviour
     {
