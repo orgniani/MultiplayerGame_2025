@@ -22,8 +22,11 @@ namespace Player
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f && footstepAudioClips.Length > 0)
             {
-                int index = Random.Range(0, footstepAudioClips.Length);
-                RpcPlayFootstep(index);
+                if (Object.HasStateAuthority)
+                {
+                    int index = Random.Range(0, footstepAudioClips.Length);
+                    //RpcPlayFootstep(index);
+                }
             }
         }
 
@@ -31,7 +34,11 @@ namespace Player
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f && landingAudioClip != null)
             {
-                RpcPlayLanding();
+                if (Object.HasStateAuthority)
+                {
+                    //RpcPlayLanding();
+                    //Currently playing multiple times
+                }
             }
         }
 
@@ -49,5 +56,4 @@ namespace Player
             AudioSource.PlayClipAtPoint(landingAudioClip, transform.TransformPoint(_controller.center), footstepAudioVolume);
         }
     }
-
 }

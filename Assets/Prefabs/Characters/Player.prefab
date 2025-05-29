@@ -215,6 +215,7 @@ MonoBehaviour:
   - {fileID: 2155334312563176835}
   - {fileID: 521310186136407524}
   - {fileID: 214626162285234907}
+  - {fileID: 174298306939284936}
   - {fileID: 2664556657609758767}
   - {fileID: 914069446203467522}
   - {fileID: 643746347695300062}
@@ -250,8 +251,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stateAuthorityChangeErrorCorrectionDelta: 0
-  gravity: -30
-  jumpImpulse: 50
+  gravity: -15
+  jumpImpulse: 7
   acceleration: 30
   braking: 30
   maxSpeed: 10

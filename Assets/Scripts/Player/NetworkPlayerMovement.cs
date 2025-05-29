@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public class NetworkPlayerMovement : MonoBehaviour
+    public class NetworkPlayerMovement : NetworkBehaviour
     {
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 2.0f;
@@ -49,9 +49,15 @@ namespace Player
 
             _networkController.Move(moveDirection * (actualSpeed * Time.fixedDeltaTime));
 
-            if (_networkController.Velocity.magnitude > actualSpeed)
-                _networkController.Velocity = _networkController.Velocity.normalized * actualSpeed;
+            // Only clamp horizontal velocity, preserve vertical velocity!
+            Vector3 horizontalVelocity = new Vector3(_networkController.Velocity.x, 0, _networkController.Velocity.z);
+            if (horizontalVelocity.magnitude > actualSpeed)
+            {
+                horizontalVelocity = horizontalVelocity.normalized * actualSpeed;
+                _networkController.Velocity = new Vector3(horizontalVelocity.x, _networkController.Velocity.y, horizontalVelocity.z);
+            }
         }
+
 
         private void BlendAnimations(Vector3 moveDirection, float targetSpeed, float inputMagnitude, NetworkPlayerAnimation animation)
         {

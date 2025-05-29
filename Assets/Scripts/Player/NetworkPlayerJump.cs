@@ -12,6 +12,7 @@ namespace Player
         private NetworkCharacterController _networkCharacterController;
         private NetworkPlayerAnimation _animation;
 
+
         public override void Spawned()
         {
             _networkCharacterController = GetComponent<NetworkCharacterController>();
@@ -24,11 +25,7 @@ namespace Player
             {
                 Debug.Log("Applying raw jump boost!");
 
-                var vel = _networkCharacterController.Velocity;
-                vel.y = 15f;
-
-                _networkCharacterController.Velocity = vel;
-
+                _networkCharacterController.Jump();
                 _animation.SetJumping(true);
             }
             else if (_networkCharacterController.Grounded)
