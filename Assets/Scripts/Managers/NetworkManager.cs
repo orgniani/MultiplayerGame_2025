@@ -6,13 +6,17 @@ using Fusion;
 using Fusion.Sockets;
 using Common;
 using Player;
+using Inputs;
 
-namespace Network
+namespace Managers
 {
     public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, INetworkRunnerCallbacks
     {
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private Transform[] spawnPositions;
+
+        [SerializeField] private NetworkPrefabRef timerPrefab;
+        [SerializeField] private NetworkPrefabRef scoreManagerPrefab;
 
         private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
         private NetworkRunner networkRunner;
@@ -109,13 +113,21 @@ namespace Network
             OnDisconnected?.Invoke();
         }
 
-        void INetworkRunnerCallbacks.OnPlayerJoined (NetworkRunner runner, PlayerRef player)
+        void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
             if (runner.IsServer)
+            {
+                if (FindFirstObjectByType<TimerManager>() == null)
+                    runner.Spawn(timerPrefab, Vector3.zero, Quaternion.identity);
+                if (FindFirstObjectByType<ScoreManager>() == null)
+                    runner.Spawn(scoreManagerPrefab, Vector3.zero, Quaternion.identity);
+
                 SpawnNewPlayer(runner, player);
+            }
 
             OnNewPlayerJoined?.Invoke("Player_" + player.PlayerId);
         }
+
 
         void INetworkRunnerCallbacks.OnPlayerLeft (NetworkRunner runner, PlayerRef player)
         {

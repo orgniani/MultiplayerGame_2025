@@ -1,6 +1,8 @@
 using UnityEngine;
-using Network;
+using Managers;
 using Fusion;
+using Cameras;
+using Inputs;
 
 namespace Player
 {

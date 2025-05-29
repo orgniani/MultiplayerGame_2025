@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Network
+namespace Cameras
 {
     public class CursorLocker : MonoBehaviour
     {

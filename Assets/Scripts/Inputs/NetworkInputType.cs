@@ -1,4 +1,4 @@
-namespace Network
+namespace Inputs
 {
     public enum NetworkInputType
     {

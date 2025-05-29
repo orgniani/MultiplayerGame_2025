@@ -1,7 +1,7 @@
 using UnityEngine;
 using Fusion;
 
-namespace Network
+namespace Inputs
 {
     public struct NetworkInputData : INetworkInput
     {
