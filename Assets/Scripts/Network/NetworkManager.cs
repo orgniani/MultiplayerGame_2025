@@ -24,6 +24,8 @@ namespace Network
 
         public NetworkPlayerSetup LocalPlayer { get; set; }
 
+        private float _jumpBufferTimer;
+        private float _jumpBufferDuration = 0.1f;
 
         async void Start ()
         {
@@ -138,7 +140,13 @@ namespace Network
             float horizontalInput = Input.GetAxis("Horizontal");
             float verticalInput = Input.GetAxis("Vertical");
             bool isSprinting = Input.GetKey(KeyCode.LeftShift);
-            bool isJumping = Input.GetKeyDown(KeyCode.Space);
+            bool isJumpingKeyPressed = Input.GetKey(KeyCode.Space);
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                _jumpBufferTimer = _jumpBufferDuration;
+
+            if (_jumpBufferTimer > 0f)
+                _jumpBufferTimer -= Time.deltaTime;
 
             networkInput.LookDirection = LocalPlayer.GetNormalizedLookDirection();
 
@@ -155,12 +163,11 @@ namespace Network
             if (isSprinting)
                 networkInput.AddInput(NetworkInputType.Sprint);
 
-            if (isJumping)
+            if (_jumpBufferTimer > 0f || isJumpingKeyPressed)
                 networkInput.AddInput(NetworkInputType.Jump);
 
             input.Set(networkInput);
         }
-
 
         void INetworkRunnerCallbacks.OnInputMissing (NetworkRunner runner, PlayerRef player, NetworkInput input) { }
         void INetworkRunnerCallbacks.OnConnectRequest (NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }

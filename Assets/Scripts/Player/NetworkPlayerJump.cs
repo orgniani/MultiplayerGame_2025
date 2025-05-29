@@ -23,8 +23,6 @@ namespace Player
         {
             if (inputData.IsInputDown(NetworkInputType.Jump) && _networkCharacterController.Grounded)
             {
-                Debug.Log("Applying raw jump boost!");
-
                 _networkCharacterController.Jump();
                 _animation.SetJumping(true);
             }
