@@ -41,6 +41,11 @@ namespace Player
 
         public override void FixedUpdateNetwork()
         {
+            _animation.UpdateGrounded(_networkCharacterController.Grounded);
+
+            bool isInAir = !_networkCharacterController.Grounded && _networkCharacterController.Velocity.y < 0f;
+            _animation.SetFreeFall(isInAir);
+
             if (!GetInput(out NetworkInputData networkInput))
                 return;
 
@@ -49,7 +54,6 @@ namespace Player
 
             _movement.HandleMoveFusion(moveDirection, isSprinting, _animation);
             _jump.HandleJumpFusion(networkInput);
-            _animation.UpdateGrounded(_networkCharacterController.Grounded);
         }
 
         private Vector3 GetMoveDirection(NetworkInputData input)

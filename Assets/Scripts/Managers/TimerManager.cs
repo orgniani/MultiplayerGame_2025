@@ -23,7 +23,6 @@ namespace Managers
             if (!HasStateAuthority || !_timerRunning) return;
 
             _remainingTime -= Runner.DeltaTime;
-            Debug.Log("timer running!");
             if (_remainingTime <= 0f)
             {
                 _remainingTime = 0f;

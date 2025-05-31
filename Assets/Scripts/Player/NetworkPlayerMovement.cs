@@ -49,7 +49,6 @@ namespace Player
 
             _networkController.Move(moveDirection * (actualSpeed * Time.fixedDeltaTime));
 
-            // Only clamp horizontal velocity, preserve vertical velocity!
             Vector3 horizontalVelocity = new Vector3(_networkController.Velocity.x, 0, _networkController.Velocity.z);
             if (horizontalVelocity.magnitude > actualSpeed)
             {

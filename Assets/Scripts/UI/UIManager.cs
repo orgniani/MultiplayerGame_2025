@@ -1,7 +1,6 @@
 using Managers;
 using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace UI

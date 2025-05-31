@@ -88,6 +88,12 @@ namespace Managers
             }
         }
 
+        public Vector3 GetRespawnPoint(PlayerRef player)
+        {
+            int index = player.PlayerId % spawnPositions.Length;
+            return spawnPositions[index].position;
+        }
+
         void INetworkRunnerCallbacks.OnConnectedToServer (NetworkRunner runner)
         {
             if (networkRunner.IsClient)
