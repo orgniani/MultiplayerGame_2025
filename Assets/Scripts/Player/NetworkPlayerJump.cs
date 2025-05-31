@@ -12,7 +12,6 @@ namespace Player
         private NetworkCharacterController _networkCharacterController;
         private NetworkPlayerAnimation _animation;
 
-
         public override void Spawned()
         {
             _networkCharacterController = GetComponent<NetworkCharacterController>();

@@ -13,7 +13,7 @@ namespace Player
 
         private CharacterController _controller;
 
-        private void Awake()
+        public override void Spawned()
         {
             _controller = GetComponent<CharacterController>();
         }

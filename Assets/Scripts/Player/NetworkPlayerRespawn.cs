@@ -10,7 +10,7 @@ namespace Player
         [SerializeField] private float deathHeightThreshold = -50f;
         private NetworkCharacterController _networkCharacterController;
 
-        private void Awake()
+        public override void Spawned()
         {
             _networkCharacterController = GetComponent<NetworkCharacterController>();
         }

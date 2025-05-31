@@ -44,7 +44,6 @@ namespace Managers
             Shutdown();
         }
 
-
         private async Task<bool> StartGameSession ()
         {
             GameObject networkRunnerObject = new GameObject(typeof(NetworkRunner).Name, typeof(NetworkRunner));

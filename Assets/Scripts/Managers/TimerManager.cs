@@ -5,10 +5,9 @@ namespace Managers
 {
     public class TimerManager : NetworkBehaviour
     {
-        [Networked] private float _remainingTime { get; set; } = 120f;
+        //TODO: Do not hardcode time
+        [Networked] public float RemainingTime { get; set; } = 120f;
         private bool _timerRunning = false;
-
-        public float GetRemainingTime() => _remainingTime;
 
         public override void Spawned()
         {
@@ -22,10 +21,10 @@ namespace Managers
         {
             if (!HasStateAuthority || !_timerRunning) return;
 
-            _remainingTime -= Runner.DeltaTime;
-            if (_remainingTime <= 0f)
+            RemainingTime -= Runner.DeltaTime;
+            if (RemainingTime <= 0f)
             {
-                _remainingTime = 0f;
+                RemainingTime = 0f;
                 _timerRunning = false;
                 Debug.Log("¡Tiempo terminado!");
             }

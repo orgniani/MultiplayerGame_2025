@@ -16,13 +16,13 @@ namespace UI
 
         private IEnumerator Start()
         {
-            if(_timerManager == null)
+            while (_timerManager == null)
             {
                 _timerManager = FindFirstObjectByType<TimerManager>();
                 yield return null;
             }
 
-            if (_scoreManager == null)
+            while (_scoreManager == null)
             {
                 _scoreManager = FindFirstObjectByType<ScoreManager>();
                 yield return null;
@@ -33,8 +33,8 @@ namespace UI
         {
             if (_timerManager)
             {
-                int minutes = Mathf.FloorToInt(_timerManager.GetRemainingTime() / 60f);
-                int seconds = Mathf.FloorToInt(_timerManager.GetRemainingTime() % 60f);
+                int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);
+                int seconds = Mathf.FloorToInt(_timerManager.RemainingTime % 60f);
                 timerText.text = $"{minutes:00}:{seconds:00}";
             }
 
@@ -44,6 +44,5 @@ namespace UI
                 scoreBText.text = $"Score B: {_scoreManager.GetScoreB()}";
             }
         }
-
     }
 }

@@ -14,7 +14,7 @@ namespace Player
         private int _animIDFreeFall = Animator.StringToHash("FreeFall");
         private int _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
 
-        private void Awake()
+        public override void Spawned()
         {
             _networkAnimator = GetComponent<NetworkMecanimAnimator>();
         }

@@ -18,7 +18,7 @@ namespace Player
         private float _animationInputXBlend;
         private float _animationInputZBlend;
 
-        private void Awake()
+        public override void Spawned()
         {
             _networkController = GetComponent<NetworkCharacterController>();
         }
