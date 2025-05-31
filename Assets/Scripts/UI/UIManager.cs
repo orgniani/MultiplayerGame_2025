@@ -1,5 +1,7 @@
+using Fusion;
 using Managers;
 using System.Collections;
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -8,41 +10,56 @@ namespace UI
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private TMP_Text timerText;
-        [SerializeField] private TMP_Text scoreAText;
-        [SerializeField] private TMP_Text scoreBText;
+        [SerializeField] private TMP_Text racePositionsText;
 
         private TimerManager _timerManager;
-        private ScoreManager _scoreManager;
+        private RacePositionManager _racePositionManager;
 
         private IEnumerator Start()
         {
-            while (_timerManager == null)
+            while (_timerManager == null || _racePositionManager == null)
             {
-                _timerManager = FindFirstObjectByType<TimerManager>();
-                yield return null;
-            }
-
-            while (_scoreManager == null)
-            {
-                _scoreManager = FindFirstObjectByType<ScoreManager>();
+                _timerManager ??= FindFirstObjectByType<TimerManager>();
+                _racePositionManager ??= FindFirstObjectByType<RacePositionManager>();
                 yield return null;
             }
         }
 
         private void FixedUpdate()
         {
-            if (_timerManager)
+            UpdateTimer();
+            UpdateRacePositions();
+        }
+
+        private void UpdateTimer()
+        {
+            if (_timerManager == null) return;
+
+            int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);
+            int seconds = Mathf.FloorToInt(_timerManager.RemainingTime % 60f);
+            timerText.text = $"{minutes:00}:{seconds:00}";
+        }
+
+        private void UpdateRacePositions()
+        {
+            if (_racePositionManager == null) return;
+
+            var playerOrder = _racePositionManager.GetCurrentPlayerOrder();
+            if (playerOrder.Count == 0) return;
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < playerOrder.Count; i++)
             {
-                int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);
-                int seconds = Mathf.FloorToInt(_timerManager.RemainingTime % 60f);
-                timerText.text = $"{minutes:00}:{seconds:00}";
+                string playerName = GetPlayerName(playerOrder[i]);
+                sb.AppendLine($"{i + 1} {playerName}");
             }
 
-            if (_scoreManager)
-            {
-                scoreAText.text = $"Score A: {_scoreManager.GetScoreA()}";
-                scoreBText.text = $"Score B: {_scoreManager.GetScoreB()}";
-            }
+            racePositionsText.text = sb.ToString();
+        }
+
+        private string GetPlayerName(PlayerRef player)
+        {
+            return "Player_" + player.PlayerId;
         }
     }
 }

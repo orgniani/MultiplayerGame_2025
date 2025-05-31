@@ -12,14 +12,19 @@ namespace Managers
 {
     public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, INetworkRunnerCallbacks
     {
-        [SerializeField] private NetworkPrefabRef playerPrefab;
+        [Header("References")]
+        [SerializeField] private Transform finishLine;
         [SerializeField] private Transform[] spawnPositions;
 
-        [SerializeField] private NetworkPrefabRef timerPrefab;
-        [SerializeField] private NetworkPrefabRef scoreManagerPrefab;
+        [Header("Prefabs")]
+        [SerializeField] private NetworkPrefabRef playerPrefab;
+        [SerializeField] private NetworkPrefabRef timerManagerPrefab;
+        [SerializeField] private NetworkPrefabRef racePositionManagerPrefab;
 
-        private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
-        private NetworkRunner networkRunner;
+        private RacePositionManager _racePositionManager;
+        
+        private readonly Dictionary<PlayerRef, NetworkObject> _spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
+        private NetworkRunner _networkRunner;
 
         public event Action OnConnected;
         public event Action OnDisconnected;
@@ -48,17 +53,17 @@ namespace Managers
         {
             GameObject networkRunnerObject = new GameObject(typeof(NetworkRunner).Name, typeof(NetworkRunner));
 
-            networkRunner = networkRunnerObject.GetComponent<NetworkRunner>();
-            networkRunner.AddCallbacks(this);
+            _networkRunner = networkRunnerObject.GetComponent<NetworkRunner>();
+            _networkRunner.AddCallbacks(this);
 
             StartGameArgs startGameArgs = new StartGameArgs()
             {
                 GameMode = GameMode.AutoHostOrClient,
-                SceneManager = networkRunner.gameObject.AddComponent<NetworkSceneManagerDefault>(),
+                SceneManager = _networkRunner.gameObject.AddComponent<NetworkSceneManagerDefault>(),
                 PlayerCount = spawnPositions.Length
             };
 
-            Task<StartGameResult> startTask = networkRunner.StartGame(startGameArgs);
+            Task<StartGameResult> startTask = _networkRunner.StartGame(startGameArgs);
             await startTask;
 
             return startTask.Result.Ok;
@@ -66,24 +71,31 @@ namespace Managers
 
         private void Shutdown ()
         {
-            if (networkRunner)
-                networkRunner.Shutdown();
+            if (_networkRunner)
+                _networkRunner.Shutdown();
         }
 
-        private void SpawnNewPlayer (NetworkRunner runner, PlayerRef player)
+        private void SpawnNewPlayer(NetworkRunner runner, PlayerRef player)
         {
-            Vector3 spawnPosition = spawnPositions[spawnedPlayers.Count].position;
+            Vector3 spawnPosition = spawnPositions[_spawnedPlayers.Count].position;
             NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
 
-            spawnedPlayers.Add(player, networkPlayerObject);
+            _spawnedPlayers.Add(player, networkPlayerObject);
+
+            _racePositionManager.RegisterPlayer(player, networkPlayerObject.transform);
+            _racePositionManager.SetFinishLine(finishLine);
         }
 
         private void DespawnPlayer (NetworkRunner runner, PlayerRef player)
         {
-            if (spawnedPlayers.ContainsKey(player))
+            if (_spawnedPlayers.ContainsKey(player))
             {
-                runner.Despawn(spawnedPlayers[player]);
-                spawnedPlayers.Remove(player);
+                runner.Despawn(_spawnedPlayers[player]);
+
+                if (_racePositionManager != null)
+                    _racePositionManager.UnregisterPlayer(player);
+
+                _spawnedPlayers.Remove(player);
             }
         }
 
@@ -95,13 +107,13 @@ namespace Managers
 
         void INetworkRunnerCallbacks.OnConnectedToServer (NetworkRunner runner)
         {
-            if (networkRunner.IsClient)
+            if (_networkRunner.IsClient)
                 OnConnected?.Invoke();
         }
 
         void INetworkRunnerCallbacks.OnDisconnectedFromServer (NetworkRunner runner, NetDisconnectReason reason)
         {
-            if (networkRunner.IsClient)
+            if (_networkRunner.IsClient)
                 Shutdown();
         }
 
@@ -110,10 +122,10 @@ namespace Managers
             if (shutdownReason == ShutdownReason.GameNotFound)
                 return;
 
-            if (networkRunner.IsServer)
-                spawnedPlayers.Clear();
+            if (_networkRunner.IsServer)
+                _spawnedPlayers.Clear();
 
-            networkRunner = null;
+            _networkRunner = null;
 
             OnDisconnected?.Invoke();
         }
@@ -123,9 +135,11 @@ namespace Managers
             if (runner.IsServer)
             {
                 if (FindFirstObjectByType<TimerManager>() == null)
-                    runner.Spawn(timerPrefab, Vector3.zero, Quaternion.identity);
-                if (FindFirstObjectByType<ScoreManager>() == null)
-                    runner.Spawn(scoreManagerPrefab, Vector3.zero, Quaternion.identity);
+                    runner.Spawn(timerManagerPrefab, Vector3.zero, Quaternion.identity);
+
+                _racePositionManager = FindFirstObjectByType<RacePositionManager>();
+                if (_racePositionManager == null)
+                    _racePositionManager = runner.Spawn(racePositionManagerPrefab, Vector3.zero, Quaternion.identity).GetComponent<RacePositionManager>();
 
                 SpawnNewPlayer(runner, player);
             }
@@ -133,14 +147,13 @@ namespace Managers
             OnNewPlayerJoined?.Invoke("Player_" + player.PlayerId);
         }
 
-
         void INetworkRunnerCallbacks.OnPlayerLeft (NetworkRunner runner, PlayerRef player)
         {
             if (runner.IsServer)
             {
                 DespawnPlayer(runner, player);
 
-                if (spawnedPlayers.Count == 0)
+                if (_spawnedPlayers.Count == 0)
                     Shutdown();
             }
 

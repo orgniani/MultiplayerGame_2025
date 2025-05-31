@@ -5,7 +5,7 @@ namespace Inputs
 {
     public struct NetworkInputData : INetworkInput
     {
-        private byte buttonsPressed;
+        private byte _buttonsPressed;
 
         public Vector3 LookDirection { get; set; }
 
@@ -13,13 +13,13 @@ namespace Inputs
         public void AddInput (NetworkInputType inputType)
         {
             byte flag = (byte)(1 << (int)inputType);
-            buttonsPressed |= flag;
+            _buttonsPressed |= flag;
         }
 
         public readonly bool IsInputDown (NetworkInputType inputType)
         {
             byte flag = (byte)(1 << (int)inputType);
-            return (buttonsPressed & flag) != 0;
+            return (_buttonsPressed & flag) != 0;
         }
     }
 }

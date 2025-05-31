@@ -29,7 +29,7 @@ namespace Cameras
         [SerializeField, Range(0f, 10f)] private float rotationSmoothSpeed = 5f;
         [SerializeField, Range(0f, 10f)] private float positionSmoothSpeed = 5f;
 
-        private Transform followTarget;
+        private Transform _followTarget;
         private float _currentX = 0f;
         private float _currentY = 10f;
         private float _currentZoom = 1f;
@@ -38,7 +38,7 @@ namespace Cameras
 
         public void SetFollowTarget(Transform target)
         {
-            followTarget = target;
+            _followTarget = target;
 
             if (_followCoroutine != null)
                 StopCoroutine(_followCoroutine);
@@ -48,7 +48,7 @@ namespace Cameras
 
         private IEnumerator FollowTargetCoroutine()
         {
-            while (followTarget)
+            while (_followTarget)
             {
                 if (!EventSystem.current.IsPointerOverGameObject())
                 {
@@ -67,7 +67,7 @@ namespace Cameras
                 }
 
                 Quaternion rotation = Quaternion.Euler(_currentY, _currentX, 0f);
-                Vector3 desiredPosition = followTarget.position + rotation * baseFollowOffset * _currentZoom;
+                Vector3 desiredPosition = _followTarget.position + rotation * baseFollowOffset * _currentZoom;
 
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSmoothSpeed * Time.deltaTime);
                 transform.position = Vector3.Lerp(transform.position, desiredPosition, positionSmoothSpeed * Time.deltaTime);
