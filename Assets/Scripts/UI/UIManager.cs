@@ -12,6 +12,7 @@ namespace UI
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text racePositionsText;
         [SerializeField] private TMP_Text winnersText;
+        [SerializeField] private GameObject waitingForPlayersText;
 
         private TimerManager _timerManager;
         private RacePositionManager _racePositionManager;
@@ -24,6 +25,8 @@ namespace UI
                 _racePositionManager ??= FindFirstObjectByType<RacePositionManager>();
                 yield return null;
             }
+
+            UpdateWaitingStatus();
         }
 
         private void FixedUpdate()
@@ -31,6 +34,13 @@ namespace UI
             UpdateTimer();
             UpdateRacePositions();
             UpdateWinners();
+            UpdateWaitingStatus();
+        }
+
+        private void UpdateWaitingStatus()
+        {
+            if (_timerManager == null) return;
+            waitingForPlayersText.SetActive(false);
         }
 
         private void UpdateTimer()

@@ -6,7 +6,9 @@ using Fusion;
 using Fusion.Sockets;
 using Common;
 using Player;
-using Inputs;
+using Managers.Network;
+using System.Linq;
+using static Unity.Collections.Unicode;
 
 namespace Managers
 {
@@ -14,6 +16,7 @@ namespace Managers
     {
         [Header("References")]
         [SerializeField] private Transform finishLine;
+        [SerializeField] private BlockerManager blockerManager;
         [SerializeField] private Transform[] spawnPositions;
 
         [Header("Prefabs")]
@@ -21,10 +24,17 @@ namespace Managers
         [SerializeField] private NetworkPrefabRef timerManagerPrefab;
         [SerializeField] private NetworkPrefabRef racePositionManagerPrefab;
 
+        [Header("Settings")]
+        [SerializeField] private int minPlayers = 2;
+
         private RacePositionManager _racePositionManager;
+        private TimerManager _timerManager;
         
         private readonly Dictionary<PlayerRef, NetworkObject> _spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
+
         private NetworkRunner _networkRunner;
+        private NetworkPlayerSpawner _playerSpawner;
+        private NetworkInputHandler _inputHandler;
 
         public event Action OnConnected;
         public event Action OnDisconnected;
@@ -33,40 +43,20 @@ namespace Managers
 
         public NetworkPlayerSetup LocalPlayer { get; set; }
 
-        private float _jumpBufferTimer;
-        private float _jumpBufferDuration = 0.1f;
-
-        async void Start ()
+        private void Awake()
         {
-            bool sessionStarted = await StartGameSession();
+            _networkRunner = FindFirstObjectByType<NetworkRunner>();
+            if (_networkRunner == null)
+            {
+                Debug.LogError("No NetworkRunner found in scene!");
+                return;
+            }
 
-            if (!sessionStarted)
-                Debug.LogError("Could not start game session!");
+            _networkRunner.AddCallbacks(this);
         }
-
         void OnApplicationQuit ()
         {
             Shutdown();
-        }
-
-        private async Task<bool> StartGameSession ()
-        {
-            GameObject networkRunnerObject = new GameObject(typeof(NetworkRunner).Name, typeof(NetworkRunner));
-
-            _networkRunner = networkRunnerObject.GetComponent<NetworkRunner>();
-            _networkRunner.AddCallbacks(this);
-
-            StartGameArgs startGameArgs = new StartGameArgs()
-            {
-                GameMode = GameMode.AutoHostOrClient,
-                SceneManager = _networkRunner.gameObject.AddComponent<NetworkSceneManagerDefault>(),
-                PlayerCount = spawnPositions.Length
-            };
-
-            Task<StartGameResult> startTask = _networkRunner.StartGame(startGameArgs);
-            await startTask;
-
-            return startTask.Result.Ok;
         }
 
         private void Shutdown ()
@@ -75,46 +65,16 @@ namespace Managers
                 _networkRunner.Shutdown();
         }
 
-        private void SpawnNewPlayer(NetworkRunner runner, PlayerRef player)
-        {
-            Vector3 spawnPosition = spawnPositions[_spawnedPlayers.Count].position;
-            NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
-
-            _spawnedPlayers.Add(player, networkPlayerObject);
-
-            _racePositionManager.RegisterPlayer(player, networkPlayerObject.transform);
-            _racePositionManager.SetFinishLine(finishLine);
-        }
-
-        private void DespawnPlayer (NetworkRunner runner, PlayerRef player)
-        {
-            if (_spawnedPlayers.ContainsKey(player))
-            {
-                runner.Despawn(_spawnedPlayers[player]);
-
-                if (_racePositionManager != null)
-                    _racePositionManager.UnregisterPlayer(player);
-
-                _spawnedPlayers.Remove(player);
-            }
-        }
-
         public Vector3 GetRespawnPoint(PlayerRef player)
         {
             int index = player.PlayerId % spawnPositions.Length;
             return spawnPositions[index].position;
         }
 
-        void INetworkRunnerCallbacks.OnConnectedToServer (NetworkRunner runner)
+        public void RegisterLocalPlayerInput(NetworkPlayerSetup localPlayer)
         {
-            if (_networkRunner.IsClient)
-                OnConnected?.Invoke();
-        }
-
-        void INetworkRunnerCallbacks.OnDisconnectedFromServer (NetworkRunner runner, NetDisconnectReason reason)
-        {
-            if (_networkRunner.IsClient)
-                Shutdown();
+            LocalPlayer = localPlayer;
+            _inputHandler = new NetworkInputHandler(localPlayer);
         }
 
         void INetworkRunnerCallbacks.OnShutdown (NetworkRunner runner, ShutdownReason shutdownReason)
@@ -134,69 +94,59 @@ namespace Managers
         {
             if (runner.IsServer)
             {
-                if (FindFirstObjectByType<TimerManager>() == null)
-                    runner.Spawn(timerManagerPrefab, Vector3.zero, Quaternion.identity);
-
                 _racePositionManager = FindFirstObjectByType<RacePositionManager>();
                 if (_racePositionManager == null)
                     _racePositionManager = runner.Spawn(racePositionManagerPrefab, Vector3.zero, Quaternion.identity).GetComponent<RacePositionManager>();
 
-                SpawnNewPlayer(runner, player);
+                _playerSpawner ??= new NetworkPlayerSpawner(spawnPositions, playerPrefab, _racePositionManager, finishLine);
+                _playerSpawner.SpawnPlayer(runner, player);
+
+                if (runner.ActivePlayers.Count() >= minPlayers)
+                {
+                    blockerManager.Rpc_RemoveStartBlocker();
+
+                    var timerObj = runner.Spawn(timerManagerPrefab, Vector3.zero, Quaternion.identity);
+                    _timerManager = timerObj.GetComponent<TimerManager>();
+
+                    Debug.Log("Race started! Timer started.");
+                }
             }
 
             OnNewPlayerJoined?.Invoke("Player_" + player.PlayerId);
         }
 
-        void INetworkRunnerCallbacks.OnPlayerLeft (NetworkRunner runner, PlayerRef player)
+        void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
             if (runner.IsServer)
             {
-                DespawnPlayer(runner, player);
+                _playerSpawner.DespawnPlayer(runner, player);
 
-                if (_spawnedPlayers.Count == 0)
+                if (_playerSpawner.SpawnedPlayerCount == 0)
                     Shutdown();
             }
 
             OnJoinedPlayerLeft?.Invoke("Player_" + player.PlayerId);
         }
 
+        void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
+        {
+            Debug.Log("Connected to server!");
+
+            if (_networkRunner.IsClient)
+                OnConnected?.Invoke();
+        }
+
+        void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+        {
+            Debug.LogWarning($"Disconnected from server: {reason}");
+
+            if (_networkRunner.IsClient)
+                Shutdown();
+        }
+
         void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input)
         {
-            if (!LocalPlayer)
-                return;
-
-            NetworkInputData networkInput = new NetworkInputData();
-
-            float horizontalInput = Input.GetAxis("Horizontal");
-            float verticalInput = Input.GetAxis("Vertical");
-            bool isSprinting = Input.GetKey(KeyCode.LeftShift);
-            bool isJumpingKeyPressed = Input.GetKey(KeyCode.Space);
-
-            if (Input.GetKeyDown(KeyCode.Space))
-                _jumpBufferTimer = _jumpBufferDuration;
-
-            if (_jumpBufferTimer > 0f)
-                _jumpBufferTimer -= Time.deltaTime;
-
-            networkInput.LookDirection = LocalPlayer.GetNormalizedLookDirection();
-
-            if (verticalInput > 0f)
-                networkInput.AddInput(NetworkInputType.MoveForward);
-            else if (verticalInput < 0f)
-                networkInput.AddInput(NetworkInputType.MoveBackwards);
-
-            if (horizontalInput < 0f)
-                networkInput.AddInput(NetworkInputType.MoveLeft);
-            else if (horizontalInput > 0f)
-                networkInput.AddInput(NetworkInputType.MoveRight);
-
-            if (isSprinting)
-                networkInput.AddInput(NetworkInputType.Sprint);
-
-            if (_jumpBufferTimer > 0f || isJumpingKeyPressed)
-                networkInput.AddInput(NetworkInputType.Jump);
-
-            input.Set(networkInput);
+            _inputHandler?.CollectInput(input);
         }
 
         void INetworkRunnerCallbacks.OnInputMissing (NetworkRunner runner, PlayerRef player, NetworkInput input) { }

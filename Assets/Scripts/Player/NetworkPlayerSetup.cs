@@ -28,7 +28,8 @@ namespace Player
 
             _cameraTracker = FindAnyObjectByType<CameraTracker>();
             _cameraTracker.SetFollowTarget(cameraTarget);
-            NetworkManager.Instance.LocalPlayer = this;
+
+            NetworkManager.Instance.RegisterLocalPlayerInput(this);
         }
 
         private void Awake()

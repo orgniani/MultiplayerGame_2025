@@ -1,4 +1,5 @@
 using Fusion;
+using System;
 using UnityEngine;
 
 namespace Managers
@@ -7,26 +8,27 @@ namespace Managers
     {
         //TODO: Do not hardcode time
         [Networked] public float RemainingTime { get; set; } = 120f;
-        private bool _timerRunning = false;
+        [Networked] public bool TimerRunning { get; private set; } = false;
+
 
         public override void Spawned()
         {
             if (HasStateAuthority)
             {
-                _timerRunning = true;
+                TimerRunning = true;
             }
         }
 
         public override void FixedUpdateNetwork()
         {
-            if (!HasStateAuthority || !_timerRunning) return;
+            if (!HasStateAuthority || !TimerRunning) return;
 
             RemainingTime -= Runner.DeltaTime;
             if (RemainingTime <= 0f)
             {
                 RemainingTime = 0f;
-                _timerRunning = false;
-                Debug.Log("¡Tiempo terminado!");
+                TimerRunning = false;
+                Debug.Log("Time ended!");
             }
         }
     }
