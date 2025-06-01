@@ -11,7 +11,11 @@ namespace Managers
         [Networked, Capacity(4)]
         private NetworkArray<PlayerRef> _playerOrder => default;
 
+        [Networked, Capacity(4)]
+        private NetworkArray<PlayerRef> _winnersOrder => default;
+
         private readonly Dictionary<PlayerRef, Transform> _playerTransforms = new();
+        private readonly HashSet<PlayerRef> _playersFinished = new();
 
         public void SetFinishLine(Transform finishLine)
         {
@@ -26,8 +30,8 @@ namespace Managers
 
         public void UnregisterPlayer(PlayerRef player)
         {
-            if (_playerTransforms.ContainsKey(player))
-                _playerTransforms.Remove(player);
+            _playerTransforms.Remove(player);
+            _playersFinished.Remove(player);
         }
 
         public List<PlayerRef> GetCurrentPlayerOrder()
@@ -46,24 +50,75 @@ namespace Managers
         {
             if (!HasStateAuthority) return;
 
+            UpdateWinners();
             UpdatePlayerPositions();
+        }
+
+        private void UpdateWinners()
+        {
+            foreach (var kvp in _playerTransforms)
+            {
+                var player = kvp.Key;
+                var transform = kvp.Value;
+
+                if (_playersFinished.Contains(player) || transform == null)
+                    continue;
+
+                float distanceToFinish = Vector3.Distance(transform.position, _finishLine.position);
+                if (distanceToFinish < 1f)
+                {
+                    _playersFinished.Add(player);
+
+                    for (int i = 0; i < _winnersOrder.Length; i++)
+                    {
+                        if (_winnersOrder.Get(i) == default)
+                        {
+                            _winnersOrder.Set(i, player);
+                            break;
+                        }
+                    }
+
+                    Debug.Log($"{player} finished!");
+                }
+            }
+        }
+
+        public List<PlayerRef> GetWinnersOrder()
+        {
+            var winners = new List<PlayerRef>();
+            for (int i = 0; i < _winnersOrder.Length; i++)
+            {
+                var player = _winnersOrder.Get(i);
+                if (player != default)
+                    winners.Add(player);
+            }
+            return winners;
         }
 
         private void UpdatePlayerPositions()
         {
-            var playerDistances = new List<(PlayerRef player, float distance)>();
+            var activePlayers = new List<(PlayerRef player, float distance)>();
 
             foreach (var kvp in _playerTransforms)
             {
-                if (kvp.Value == null) continue;
-                float distanceToFinish = Vector3.Distance(kvp.Value.position, _finishLine.position);
-                playerDistances.Add((kvp.Key, distanceToFinish));
+                var player = kvp.Key;
+                var transform = kvp.Value;
+
+                if (_playersFinished.Contains(player) || transform == null)
+                    continue;
+
+                float distanceToFinish = Vector3.Distance(transform.position, _finishLine.position);
+                activePlayers.Add((player, distanceToFinish));
             }
 
-            playerDistances.Sort((a, b) => a.distance.CompareTo(b.distance));
+            var finalOrder = new List<PlayerRef>(_playersFinished);
 
-            for (int i = 0; i < playerDistances.Count; i++)
-                _playerOrder.Set(i, playerDistances[i].player);
+            activePlayers.Sort((a, b) => a.distance.CompareTo(b.distance));
+            foreach (var (player, _) in activePlayers)
+                finalOrder.Add(player);
+
+            for (int i = 0; i < _playerOrder.Length; i++)
+                _playerOrder.Set(i, i < finalOrder.Count ? finalOrder[i] : default);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace UI
     {
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text racePositionsText;
+        [SerializeField] private TMP_Text winnersText;
 
         private TimerManager _timerManager;
         private RacePositionManager _racePositionManager;
@@ -29,6 +30,7 @@ namespace UI
         {
             UpdateTimer();
             UpdateRacePositions();
+            UpdateWinners();
         }
 
         private void UpdateTimer()
@@ -55,6 +57,27 @@ namespace UI
             }
 
             racePositionsText.text = sb.ToString();
+        }
+
+        private void UpdateWinners()
+        {
+            if (_racePositionManager == null) return;
+
+            var winners = _racePositionManager.GetWinnersOrder();
+            if (winners.Count == 0)
+            {
+                winnersText.text = "No winners yet!";
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < winners.Count; i++)
+            {
+                string playerName = GetPlayerName(winners[i]);
+                sb.AppendLine($"{i + 1} {playerName}");
+            }
+
+            winnersText.text = sb.ToString();
         }
 
         private string GetPlayerName(PlayerRef player)
