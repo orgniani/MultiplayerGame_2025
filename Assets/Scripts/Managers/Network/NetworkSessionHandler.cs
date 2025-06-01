@@ -7,8 +7,6 @@ namespace Managers.Network
 {
     public class NetworkSessionHandler
     {
-        private const string LobbyName = "RaceLobby";
-
         public async Task<bool> StartSession(NetworkRunner runner, GameMode gameMode, int maxPlayers)
         {
             StartGameArgs args = new StartGameArgs()
@@ -38,7 +36,6 @@ namespace Managers.Network
             Debug.Log($"Start game result: {result.Ok}");
             return result.Ok;
         }
-
 
         public void ShutdownSession(NetworkRunner runner)
         {

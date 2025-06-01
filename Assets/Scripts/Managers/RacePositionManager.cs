@@ -64,8 +64,8 @@ namespace Managers
                 if (_playersFinished.Contains(player) || transform == null)
                     continue;
 
-                float distanceToFinish = Vector3.Distance(transform.position, _finishLine.position);
-                if (distanceToFinish < 1f)
+                float distanceToFinishZ = Mathf.Abs(transform.position.z - _finishLine.position.z);
+                if (distanceToFinishZ < 1f)
                 {
                     _playersFinished.Add(player);
 
@@ -107,8 +107,8 @@ namespace Managers
                 if (_playersFinished.Contains(player) || transform == null)
                     continue;
 
-                float distanceToFinish = Vector3.Distance(transform.position, _finishLine.position);
-                activePlayers.Add((player, distanceToFinish));
+                float distanceToFinishZ = Mathf.Abs(transform.position.z - _finishLine.position.z);
+                activePlayers.Add((player, distanceToFinishZ));
             }
 
             var finalOrder = new List<PlayerRef>(_playersFinished);

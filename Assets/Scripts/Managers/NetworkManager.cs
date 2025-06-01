@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
@@ -8,7 +7,6 @@ using Common;
 using Player;
 using Managers.Network;
 using System.Linq;
-using static Unity.Collections.Unicode;
 
 namespace Managers
 {

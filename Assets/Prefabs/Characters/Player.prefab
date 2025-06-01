@@ -349,7 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5eab65d572695e4fa74e7436e52806d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deathHeightThreshold: -20
+  deathHeightThreshold: -5
 --- !u!1001 &3340880630174348696
 PrefabInstance:
   m_ObjectHideFlags: 0

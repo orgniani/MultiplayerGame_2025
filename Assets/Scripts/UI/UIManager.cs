@@ -34,7 +34,6 @@ namespace UI
             UpdateTimer();
             UpdateRacePositions();
             UpdateWinners();
-            UpdateWaitingStatus();
         }
 
         private void UpdateWaitingStatus()
