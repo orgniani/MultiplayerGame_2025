@@ -1,39 +1,65 @@
-using Fusion;
 using Managers;
 using System.Collections;
-using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
     public class UIManager : MonoBehaviour
     {
+        [Header("Text")]
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text racePositionsText;
         [SerializeField] private TMP_Text winnersText;
+
+        [Header("Game objects")]
         [SerializeField] private GameObject waitingForPlayersText;
+        [SerializeField] private GameObject gameOverCanvas;
+
+        [Header("Buttons")]
+        [SerializeField] private Button menuButton;
 
         private TimerManager _timerManager;
         private RacePositionManager _racePositionManager;
+        private GameOverManager _gameOverManager;
+
+        private UITimer _uiTimer;
+        private UIRacePositions _uiRacePositions;
+
+        private void OnEnable()
+        {
+            menuButton.onClick.AddListener(ReturnToMainMenu);
+            gameOverCanvas.SetActive(false);
+            waitingForPlayersText.SetActive(true);
+        }
 
         private IEnumerator Start()
         {
-            while (_timerManager == null || _racePositionManager == null)
+            while (_timerManager == null || _racePositionManager == null || _gameOverManager == null)
             {
                 _timerManager ??= FindFirstObjectByType<TimerManager>();
                 _racePositionManager ??= FindFirstObjectByType<RacePositionManager>();
+                _gameOverManager ??= FindFirstObjectByType<GameOverManager>();
                 yield return null;
             }
+
+            _uiTimer = new UITimer(_timerManager, timerText);
+            _uiRacePositions = new UIRacePositions(_racePositionManager, racePositionsText, winnersText);
 
             UpdateWaitingStatus();
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
-            UpdateTimer();
-            UpdateRacePositions();
-            UpdateWinners();
+            if (_uiTimer == null || _uiRacePositions == null)
+                return;
+
+            _uiTimer.UpdateTimer();
+            _uiRacePositions.UpdateRacePositions();
+            _uiRacePositions.UpdateWinners();
+
+            CheckGameOver();
         }
 
         private void UpdateWaitingStatus()
@@ -42,56 +68,18 @@ namespace UI
             waitingForPlayersText.SetActive(false);
         }
 
-        private void UpdateTimer()
+        private void CheckGameOver()
         {
-            if (_timerManager == null) return;
-
-            int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);
-            int seconds = Mathf.FloorToInt(_timerManager.RemainingTime % 60f);
-            timerText.text = $"{minutes:00}:{seconds:00}";
+            if (_gameOverManager != null && _gameOverManager.IsGameOver && !gameOverCanvas.activeSelf)
+            {
+                Debug.Log("Client: Showing game over screen!");
+                gameOverCanvas.SetActive(true);
+            }
         }
 
-        private void UpdateRacePositions()
+        private void ReturnToMainMenu()
         {
-            if (_racePositionManager == null) return;
 
-            var playerOrder = _racePositionManager.GetCurrentPlayerOrder();
-            if (playerOrder.Count == 0) return;
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < playerOrder.Count; i++)
-            {
-                string playerName = GetPlayerName(playerOrder[i]);
-                sb.AppendLine($"{i + 1} {playerName}");
-            }
-
-            racePositionsText.text = sb.ToString();
-        }
-
-        private void UpdateWinners()
-        {
-            if (_racePositionManager == null) return;
-
-            var winners = _racePositionManager.GetWinnersOrder();
-            if (winners.Count == 0)
-            {
-                winnersText.text = "No winners yet!";
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < winners.Count; i++)
-            {
-                string playerName = GetPlayerName(winners[i]);
-                sb.AppendLine($"{i + 1} {playerName}");
-            }
-
-            winnersText.text = sb.ToString();
-        }
-
-        private string GetPlayerName(PlayerRef player)
-        {
-            return "Player_" + player.PlayerId;
         }
     }
 }

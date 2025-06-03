@@ -21,6 +21,7 @@ namespace Managers
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private NetworkPrefabRef timerManagerPrefab;
         [SerializeField] private NetworkPrefabRef racePositionManagerPrefab;
+        [SerializeField] private NetworkPrefabRef gameOverManagerPrefab;
 
         [Header("Settings")]
         [SerializeField] private int minPlayers = 2;
@@ -106,6 +107,7 @@ namespace Managers
                     var timerObj = runner.Spawn(timerManagerPrefab, Vector3.zero, Quaternion.identity);
                     _timerManager = timerObj.GetComponent<TimerManager>();
 
+                    var gameOverManagerObj = runner.Spawn(gameOverManagerPrefab, Vector3.zero, Quaternion.identity);
                     Debug.Log("Race started! Timer started.");
                 }
             }

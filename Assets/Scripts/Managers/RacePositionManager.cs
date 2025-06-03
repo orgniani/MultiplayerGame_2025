@@ -120,5 +120,19 @@ namespace Managers
             for (int i = 0; i < _playerOrder.Length; i++)
                 _playerOrder.Set(i, i < finalOrder.Count ? finalOrder[i] : default);
         }
+
+        public bool AreAnyActiveNonWinners()
+        {
+            foreach (var kvp in _playerTransforms)
+            {
+                var player = kvp.Key;
+                var transform = kvp.Value;
+
+                if (!_playersFinished.Contains(player) && transform != null)
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

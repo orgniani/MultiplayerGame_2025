@@ -21,6 +21,8 @@ namespace Player
         private NetworkPlayerJump _jump;
         private CameraTracker _cameraTracker;
 
+        private GameOverManager _gameOverManager;
+
         public override void Spawned()
         {
             if (!Object.HasInputAuthority)
@@ -30,6 +32,7 @@ namespace Player
             _cameraTracker.SetFollowTarget(cameraTarget);
 
             NetworkManager.Instance.RegisterLocalPlayerInput(this);
+            _gameOverManager = FindFirstObjectByType<GameOverManager>();
         }
 
         private void Awake()
@@ -46,6 +49,9 @@ namespace Player
 
             bool isInAir = !_networkCharacterController.Grounded && _networkCharacterController.Velocity.y < 0f;
             _animation.SetFreeFall(isInAir);
+
+            if (_gameOverManager != null && _gameOverManager.IsGameOver)
+                return;
 
             if (!GetInput(out NetworkInputData networkInput))
                 return;
