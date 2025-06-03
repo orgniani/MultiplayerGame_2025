@@ -1,5 +1,6 @@
 using Fusion;
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Managers
@@ -7,17 +8,10 @@ namespace Managers
     public class TimerManager : NetworkBehaviour
     {
         //TODO: Do not hardcode time
-        [Networked] public float RemainingTime { get; set; } = 120f;
+        [Networked] public float RemainingTime { get; private set; } = 120f;
         [Networked] public bool TimerRunning { get; private set; } = false;
 
-
-        public override void Spawned()
-        {
-            if (HasStateAuthority)
-            {
-                TimerRunning = true;
-            }
-        }
+        private Coroutine _countdownCoroutine;
 
         public override void FixedUpdateNetwork()
         {
@@ -30,6 +24,27 @@ namespace Managers
                 TimerRunning = false;
                 Debug.Log("Time ended!");
             }
+        }
+
+        public void StartRaceCountdown(BlockerManager blockerManager)
+        {
+            if (!HasStateAuthority || TimerRunning || _countdownCoroutine != null)
+                return;
+
+            _countdownCoroutine = StartCoroutine(CountdownCoroutine(blockerManager));
+        }
+
+        private IEnumerator CountdownCoroutine(BlockerManager blockerManager)
+        {
+            yield return new WaitForSeconds(3f);
+
+            blockerManager.Rpc_RemoveStartBlocker();
+            TimerRunning = true;
+        }
+
+        public void StopTimer()
+        {
+            TimerRunning = false;
         }
     }
 }

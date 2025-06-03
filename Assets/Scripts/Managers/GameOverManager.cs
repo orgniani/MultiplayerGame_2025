@@ -41,6 +41,10 @@ namespace Managers
         private void TriggerGameOver(string reason)
         {
             _isGameOver = true;
+
+            if (_timerManager != null)
+                _timerManager.StopTimer();
+
             Debug.Log($"<color=red>Game over triggered! Reason: {reason}</color>");
         }
     }

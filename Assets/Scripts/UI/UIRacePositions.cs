@@ -21,12 +21,15 @@ namespace UI
 
         public void UpdateRacePositions()
         {
-            if (_racePositionManager == null) return;
+            if (!_racePositionManager || !_racePositionManager.HasStateAuthority)
+                return;
 
             var playerOrder = _racePositionManager.GetCurrentPlayerOrder();
             if (playerOrder.Count == 0) return;
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Positions:");
+
             for (int i = 0; i < playerOrder.Count; i++)
             {
                 string playerName = GetPlayerName(playerOrder[i]);
@@ -38,7 +41,8 @@ namespace UI
 
         public void UpdateWinners()
         {
-            if (_racePositionManager == null) return;
+            if (!_racePositionManager || !_racePositionManager.HasStateAuthority)
+                return;
 
             var winners = _racePositionManager.GetWinnersOrder();
             if (winners.Count == 0)
@@ -48,6 +52,8 @@ namespace UI
             }
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Winners:");
+
             for (int i = 0; i < winners.Count; i++)
             {
                 string playerName = GetPlayerName(winners[i]);

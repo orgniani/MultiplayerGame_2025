@@ -7,6 +7,8 @@ using Common;
 using Player;
 using Managers.Network;
 using System.Linq;
+using static Unity.Collections.Unicode;
+using System.Collections;
 
 namespace Managers
 {
@@ -28,6 +30,7 @@ namespace Managers
 
         private RacePositionManager _racePositionManager;
         private TimerManager _timerManager;
+        private GameOverManager _gameOverManager;
         
         private readonly Dictionary<PlayerRef, NetworkObject> _spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -70,6 +73,10 @@ namespace Managers
             return spawnPositions[index].position;
         }
 
+        public GameOverManager GetGameOverManager()
+        {
+            return _gameOverManager;
+        }
         public void RegisterLocalPlayerInput(NetworkPlayerSetup localPlayer)
         {
             LocalPlayer = localPlayer;
@@ -95,20 +102,23 @@ namespace Managers
             {
                 _racePositionManager = FindFirstObjectByType<RacePositionManager>();
                 if (_racePositionManager == null)
+                {
                     _racePositionManager = runner.Spawn(racePositionManagerPrefab, Vector3.zero, Quaternion.identity).GetComponent<RacePositionManager>();
+                    _racePositionManager.OnPlayerFinished += HandlePlayerFinished;
+                }
 
                 _playerSpawner ??= new NetworkPlayerSpawner(spawnPositions, playerPrefab, _racePositionManager, finishLine);
                 _playerSpawner.SpawnPlayer(runner, player);
 
                 if (runner.ActivePlayers.Count() >= minPlayers)
                 {
-                    blockerManager.Rpc_RemoveStartBlocker();
-
                     var timerObj = runner.Spawn(timerManagerPrefab, Vector3.zero, Quaternion.identity);
                     _timerManager = timerObj.GetComponent<TimerManager>();
 
+                    _timerManager.StartRaceCountdown(blockerManager);
+
                     var gameOverManagerObj = runner.Spawn(gameOverManagerPrefab, Vector3.zero, Quaternion.identity);
-                    Debug.Log("Race started! Timer started.");
+                    _gameOverManager = gameOverManagerObj.GetComponent<GameOverManager>();
                 }
             }
 
@@ -121,11 +131,45 @@ namespace Managers
             {
                 _playerSpawner.DespawnPlayer(runner, player);
 
+                if(_racePositionManager != null)
+                    _racePositionManager.OnPlayerFinished -= HandlePlayerFinished;
+
                 if (_playerSpawner.SpawnedPlayerCount == 0)
                     Shutdown();
             }
 
             OnJoinedPlayerLeft?.Invoke("Player_" + player.PlayerId);
+        }
+
+        private void HandlePlayerFinished(PlayerRef player)
+        {
+            if (player != _networkRunner.LocalPlayer)
+                return;
+
+            Debug.Log("Local player won via RacePositionManager event!");
+            HandleLocalPlayerWin();
+        }
+
+        private void HandleLocalPlayerWin()
+        {
+            Debug.Log("Local player has won! Switching camera...");
+
+            var playerOrder = _racePositionManager.GetCurrentPlayerOrder();
+            var nextPlayerRef = playerOrder.Find(p => p != _networkRunner.LocalPlayer);
+
+            if (nextPlayerRef != default)
+            {
+                var nextPlayer = _playerSpawner.GetPlayerSetup(nextPlayerRef);
+                if (nextPlayer != null && LocalPlayer != null)
+                {
+                    LocalPlayer.GetCameraTracker().SetFollowTarget(nextPlayer.GetCameraTarget());
+                }
+            }
+
+            if (LocalPlayer != null && LocalPlayer.HasStateAuthority)
+            {
+                _networkRunner.Despawn(LocalPlayer.GetComponent<NetworkObject>());
+            }
         }
 
         void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)

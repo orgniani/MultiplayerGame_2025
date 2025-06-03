@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Managers
 
         private readonly Dictionary<PlayerRef, Transform> _playerTransforms = new();
         private readonly HashSet<PlayerRef> _playersFinished = new();
+
+        public event Action<PlayerRef> OnPlayerFinished;
 
         public void SetFinishLine(Transform finishLine)
         {
@@ -74,6 +77,7 @@ namespace Managers
                         if (_winnersOrder.Get(i) == default)
                         {
                             _winnersOrder.Set(i, player);
+                            OnPlayerFinished?.Invoke(player);
                             break;
                         }
                     }

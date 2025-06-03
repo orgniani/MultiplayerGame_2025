@@ -53,7 +53,7 @@ AnimatorStateMachine:
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: 10, y: 400, z: 0}
+  m_AnyStatePosition: {x: 20, y: 400, z: 0}
   m_EntryPosition: {x: 220, y: 330, z: 0}
   m_ExitPosition: {x: 680, y: 260, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
@@ -639,7 +639,7 @@ AnimatorStateTransition:
   m_IsExit: 0
   serializedVersion: 3
   m_TransitionDuration: 0.07026373
-  m_TransitionOffset: 0
+  m_TransitionOffset: 0.3
   m_ExitTime: 0.03574113
   m_HasExitTime: 0
   m_HasFixedDuration: 1

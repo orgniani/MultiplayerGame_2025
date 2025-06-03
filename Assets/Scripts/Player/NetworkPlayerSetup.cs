@@ -3,6 +3,7 @@ using Managers;
 using Fusion;
 using Cameras;
 using Inputs;
+using System.Collections;
 
 namespace Player
 {
@@ -23,6 +24,9 @@ namespace Player
 
         private GameOverManager _gameOverManager;
 
+        public Transform GetCameraTarget() => cameraTarget;
+        public CameraTracker GetCameraTracker() => _cameraTracker;
+
         public override void Spawned()
         {
             if (!Object.HasInputAuthority)
@@ -32,7 +36,6 @@ namespace Player
             _cameraTracker.SetFollowTarget(cameraTarget);
 
             NetworkManager.Instance.RegisterLocalPlayerInput(this);
-            _gameOverManager = FindFirstObjectByType<GameOverManager>();
         }
 
         private void Awake()
@@ -43,15 +46,21 @@ namespace Player
             _animation = GetComponent<NetworkPlayerAnimation>();
         }
 
+        private IEnumerator Start()
+        {
+            while(_gameOverManager == null)
+            {
+                _gameOverManager = NetworkManager.Instance.GetGameOverManager();
+                yield return null;
+            }
+        }
+
         public override void FixedUpdateNetwork()
         {
             _animation.UpdateGrounded(_networkCharacterController.Grounded);
 
             bool isInAir = !_networkCharacterController.Grounded && _networkCharacterController.Velocity.y < 0f;
             _animation.SetFreeFall(isInAir);
-
-            if (_gameOverManager != null && _gameOverManager.IsGameOver)
-                return;
 
             if (!GetInput(out NetworkInputData networkInput))
                 return;
@@ -66,6 +75,9 @@ namespace Player
         private Vector3 GetMoveDirection(NetworkInputData input)
         {
             Vector3 moveDirection = Vector3.zero;
+
+            if (_gameOverManager != null && _gameOverManager.IsGameOver)
+                return moveDirection;
 
             Vector3 forward = input.LookDirection;
             Vector3 right = Quaternion.AngleAxis(90f, Vector3.up) * input.LookDirection;

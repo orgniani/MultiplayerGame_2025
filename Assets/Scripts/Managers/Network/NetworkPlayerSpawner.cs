@@ -1,4 +1,5 @@
 using Fusion;
+using Player;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,6 +42,14 @@ namespace Managers.Network
                 _racePositionManager.UnregisterPlayer(player);
                 _spawnedPlayers.Remove(player);
             }
+        }
+
+        public NetworkPlayerSetup GetPlayerSetup(PlayerRef playerRef)
+        {
+            if (_spawnedPlayers.TryGetValue(playerRef, out var obj))
+                return obj.GetComponent<NetworkPlayerSetup>();
+
+            return null;
         }
 
         public void ClearAll()

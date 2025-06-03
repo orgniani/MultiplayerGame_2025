@@ -17,11 +17,12 @@ namespace UI
 
         public void UpdateTimer()
         {
-            if (_timerManager == null) return;
+            if (!_timerManager || !_timerManager.HasStateAuthority)
+                return;
 
             int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);
             int seconds = Mathf.FloorToInt(_timerManager.RemainingTime % 60f);
-            _timerText.text = $"{minutes:00}:{seconds:00}";
+            _timerText.text = $"TIME LEFT: {minutes:00}:{seconds:00}";
         }
     }
 }
