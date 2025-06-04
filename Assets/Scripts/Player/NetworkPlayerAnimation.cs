@@ -39,32 +39,5 @@ namespace Player
         {
             _networkAnimator.Animator.SetBool(_animIDFreeFall, freeFall);
         }
-
-
-        //private const string TauntTriggerName = "Taunt";
-
-        //void Update()
-        //{
-        //    if (!Object.HasInputAuthority)
-        //        return;
-
-        //    if (Input.GetKeyDown(KeyCode.Alpha1))
-        //        Rpc_PlayTaunt(1);
-        //    else if (Input.GetKeyDown(KeyCode.Alpha2))
-        //        Rpc_PlayTaunt(2);
-        //}
-
-        //[Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-        //private void Rpc_PlayTaunt(int tauntNumber)
-        //{
-        //    Rpc_RelayTaunt(tauntNumber);
-        //}
-
-        //[Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
-        //private void Rpc_RelayTaunt(int tauntNumber)
-        //{
-        //    _networkAnimator.SetTrigger($"{TauntTriggerName} {tauntNumber}", passThroughOnInputAuthority: true);
-        //}
-
     }
 }

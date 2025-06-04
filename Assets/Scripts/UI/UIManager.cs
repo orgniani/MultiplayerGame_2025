@@ -129,10 +129,6 @@ namespace UI
 
         private void ReturnToMainMenu()
         {
-            var runner = FindFirstObjectByType<NetworkRunner>();
-            if (runner != null)
-                runner.Shutdown();
-
             UnityEngine.SceneManagement.SceneManager.LoadScene(mainMenuBuildIndex);
         }
 

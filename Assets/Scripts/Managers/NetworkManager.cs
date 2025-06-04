@@ -48,7 +48,7 @@ namespace Managers
             _networkRunner = FindFirstObjectByType<NetworkRunner>();
             if (_networkRunner == null)
             {
-                Debug.LogError("No NetworkRunner found in scene!");
+                Debug.LogWarning("No NetworkRunner found in scene!");
                 return;
             }
 
@@ -56,7 +56,8 @@ namespace Managers
         }
         void OnApplicationQuit ()
         {
-            Shutdown();
+            if (_networkRunner)
+                _networkRunner.Shutdown();
         }
 
         public void Shutdown ()
@@ -163,7 +164,7 @@ namespace Managers
             }
 
             if (LocalPlayer != null)
-                LocalPlayer.RpcFakeDespawn();
+                LocalPlayer.RpcRequestDespawnRelay();
         }
 
         void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)

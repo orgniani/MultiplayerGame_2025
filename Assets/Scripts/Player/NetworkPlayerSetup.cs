@@ -105,11 +105,20 @@ namespace Player
             return lookDirection.normalized;
         }
 
-        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
-        public void RpcFakeDespawn()
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+        public void RpcRequestDespawnRelay()
         {
-            Debug.Log("Player: Hiding visuals via RPC.");
+            RpcPerformDespawn();
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+        private void RpcPerformDespawn()
+        {
+            Debug.Log("Performing despawn on ALL");
             HideVisuals();
+
+            if (HasStateAuthority)
+                Runner.Despawn(Object);
         }
 
         public void HideVisuals()
