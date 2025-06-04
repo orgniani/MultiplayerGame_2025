@@ -10,6 +10,7 @@ namespace UI
     public class UIMainMenuManager : MonoBehaviour
     {
         [SerializeField] private Button joinButton;
+        [SerializeField] private Button quitButton;
         [SerializeField] private GameObject loadingPanel;
 
         [Header("Build Index of Game Scene")]
@@ -22,6 +23,22 @@ namespace UI
         {
             _sessionHandler = new NetworkSessionHandler();
             joinButton.onClick.AddListener(() => StartCoroutine(StartGameCoroutine()));
+            quitButton.onClick.AddListener(QuitGame);
+        }
+
+        private void OnDisable()
+        {
+            joinButton.onClick.RemoveListener(() => StartCoroutine(StartGameCoroutine()));
+            quitButton.onClick.RemoveListener(QuitGame);
+        }
+
+        private void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
         }
 
         private IEnumerator StartGameCoroutine()

@@ -17,7 +17,7 @@ namespace UI
 
         public void UpdateTimer()
         {
-            if (!_timerManager || !_timerManager.HasStateAuthority)
+            if (_timerManager == null || _timerManager.Object == null)
                 return;
 
             int minutes = Mathf.FloorToInt(_timerManager.RemainingTime / 60f);

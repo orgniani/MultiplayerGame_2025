@@ -7,8 +7,6 @@ using Common;
 using Player;
 using Managers.Network;
 using System.Linq;
-using static Unity.Collections.Unicode;
-using System.Collections;
 
 namespace Managers
 {
@@ -61,7 +59,7 @@ namespace Managers
             Shutdown();
         }
 
-        private void Shutdown ()
+        public void Shutdown ()
         {
             if (_networkRunner)
                 _networkRunner.Shutdown();
@@ -161,15 +159,11 @@ namespace Managers
             {
                 var nextPlayer = _playerSpawner.GetPlayerSetup(nextPlayerRef);
                 if (nextPlayer != null && LocalPlayer != null)
-                {
                     LocalPlayer.GetCameraTracker().SetFollowTarget(nextPlayer.GetCameraTarget());
-                }
             }
 
-            if (LocalPlayer != null && LocalPlayer.HasStateAuthority)
-            {
-                _networkRunner.Despawn(LocalPlayer.GetComponent<NetworkObject>());
-            }
+            if (LocalPlayer != null)
+                LocalPlayer.RpcFakeDespawn();
         }
 
         void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)

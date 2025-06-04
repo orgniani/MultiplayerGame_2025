@@ -43,14 +43,27 @@ namespace UI
             waitingForPlayersPanel.SetActive(true);
             countdownCanvas.SetActive(false);
 
+            if (NetworkManager.Instance)
+                NetworkManager.Instance.OnDisconnected += TriggerGameOver;
+
             CursorLocker.Lock();
+        }
+
+        private void OnDisable()
+        {
+            menuButton.onClick.RemoveListener(ReturnToMainMenu);
+
+            if (NetworkManager.Instance)
+                NetworkManager.Instance.OnDisconnected -= TriggerGameOver;
+
+            CursorLocker.Unlock();
         }
 
         private IEnumerator Start()
         {
-            while (_timerManager == null || !_timerManager.HasStateAuthority)
+            while (_timerManager == null)
             {
-                _timerManager ??= FindFirstObjectByType<TimerManager>();
+                _timerManager = FindFirstObjectByType<TimerManager>();
                 yield return null;
             }
 
@@ -94,7 +107,7 @@ namespace UI
 
         private void CheckGameOver()
         {
-            if(_gameOverManager == null || !_gameOverManager.HasStateAuthority)
+            if(_gameOverManager == null || _gameOverManager.Object == null)
                 return;
 
             if (_gameOverManager.IsGameOver && !gameOverCanvas.activeSelf)
@@ -103,8 +116,15 @@ namespace UI
 
                 CursorLocker.Unlock();
                 gameOverCanvas.SetActive(true);
-                finalWinnersText.text = "WINNERS\n" + winnersText.text;
+                finalWinnersText.text = winnersText.text;
             }
+        }
+
+        private void TriggerGameOver()
+        {
+            CursorLocker.Unlock();
+            gameOverCanvas.SetActive(true);
+            finalWinnersText.text = winnersText.text;
         }
 
         private void ReturnToMainMenu()

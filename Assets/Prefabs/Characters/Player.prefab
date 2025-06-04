@@ -272,6 +272,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTarget: {fileID: 8138214562552886655}
+  _collider: {fileID: 1563732265242273101}
+  _visuals: {fileID: 2493966058294823113}
 --- !u!114 &174298306939284936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -696,6 +698,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38d4d6dfe9f34454a978550f950c149a, type: 3}
+--- !u!1 &2493966058294823113 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 38d4d6dfe9f34454a978550f950c149a, type: 3}
+  m_PrefabInstance: {fileID: 3340880630174348696}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3015028309780796019 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 38d4d6dfe9f34454a978550f950c149a, type: 3}

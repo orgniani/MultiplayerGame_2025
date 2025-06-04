@@ -21,8 +21,9 @@ namespace UI
 
         public void UpdateRacePositions()
         {
-            if (!_racePositionManager || !_racePositionManager.HasStateAuthority)
+            if (_racePositionManager == null || _racePositionManager.Object == null)
                 return;
+
 
             var playerOrder = _racePositionManager.GetCurrentPlayerOrder();
             if (playerOrder.Count == 0) return;
@@ -41,7 +42,7 @@ namespace UI
 
         public void UpdateWinners()
         {
-            if (!_racePositionManager || !_racePositionManager.HasStateAuthority)
+            if (_racePositionManager == null || _racePositionManager.Object == null)
                 return;
 
             var winners = _racePositionManager.GetWinnersOrder();
@@ -52,7 +53,7 @@ namespace UI
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Winners:");
+            sb.AppendLine("WINNERS");
 
             for (int i = 0; i < winners.Count; i++)
             {

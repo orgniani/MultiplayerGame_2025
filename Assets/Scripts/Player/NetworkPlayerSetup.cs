@@ -16,6 +16,10 @@ namespace Player
         [Header("Camera Follow Target")]
         [SerializeField] private Transform cameraTarget;
 
+        [Header("Children")]
+        [SerializeField] private GameObject _collider;
+        [SerializeField] private GameObject _visuals;
+
         private NetworkCharacterController _networkCharacterController;
         private NetworkPlayerAnimation _animation;
         private NetworkPlayerMovement _movement;
@@ -48,7 +52,7 @@ namespace Player
 
         private IEnumerator Start()
         {
-            while(_gameOverManager == null)
+            while (_gameOverManager == null)
             {
                 _gameOverManager = NetworkManager.Instance.GetGameOverManager();
                 yield return null;
@@ -99,6 +103,22 @@ namespace Player
             Vector3 lookDirection = _cameraTracker.transform.forward;
             lookDirection.y = 0f;
             return lookDirection.normalized;
+        }
+
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        public void RpcFakeDespawn()
+        {
+            Debug.Log("Player: Hiding visuals via RPC.");
+            HideVisuals();
+        }
+
+        public void HideVisuals()
+        {
+            _collider.SetActive(false);
+            _visuals.SetActive(false);
+
+            if (TryGetComponent<CharacterController>(out var controller))
+                controller.enabled = false;
         }
     }
 }

@@ -46,6 +46,9 @@ namespace Managers
                 _timerManager.StopTimer();
 
             Debug.Log($"<color=red>Game over triggered! Reason: {reason}</color>");
+
+            if (Object.HasStateAuthority)
+                NetworkManager.Instance.Shutdown();
         }
     }
 }
