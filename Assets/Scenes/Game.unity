@@ -1505,7 +1505,7 @@ MonoBehaviour:
     m_Left: 50
     m_Right: 0
     m_Top: 0
-    m_Bottom: 10
+    m_Bottom: 30
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -2070,6 +2070,7 @@ GameObject:
   - component: {fileID: 1280786947}
   - component: {fileID: 1280786949}
   - component: {fileID: 1280786948}
+  - component: {fileID: 1280786950}
   m_Layer: 5
   m_Name: RacePositionsText
   m_TagString: Untagged
@@ -2091,11 +2092,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 960259279}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1000, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 550, y: -63.99}
+  m_SizeDelta: {x: 1000, y: 0}
+  m_Pivot: {x: 0.5, y: 2}
 --- !u!114 &1280786948
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2116,7 +2117,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Positions
+  m_text: 'Positions:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
   m_sharedMaterial: {fileID: 2137670499336209689, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
@@ -2151,7 +2152,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2195,6 +2196,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1280786946}
   m_CullTransparentMesh: 1
+--- !u!114 &1280786950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280786946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &1371044887
 GameObject:
   m_ObjectHideFlags: 0
@@ -2508,9 +2523,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding:
     m_Left: 50
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Right: 50
+    m_Top: 30
+    m_Bottom: 30
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -3978,7 +3993,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Waiting for more players
+  m_text: Waiting for more players (min 2)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
   m_sharedMaterial: {fileID: 2137670499336209689, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
@@ -4429,6 +4444,7 @@ GameObject:
   - component: {fileID: 2141847520}
   - component: {fileID: 2141847522}
   - component: {fileID: 2141847521}
+  - component: {fileID: 2141847523}
   m_Layer: 5
   m_Name: WinnersText
   m_TagString: Untagged
@@ -4450,11 +4466,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1524348874}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1000, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 550, y: -66.009995}
+  m_SizeDelta: {x: 1000, y: 0}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2141847521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4475,9 +4491,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Winners
-
-'
+  m_text: Winners
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
   m_sharedMaterial: {fileID: 2137670499336209689, guid: ae488230e9b85f4478223cf86eec448a, type: 2}
@@ -4512,7 +4526,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 1024
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -4556,6 +4570,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2141847519}
   m_CullTransparentMesh: 1
+--- !u!114 &2141847523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141847519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1001 &575380160321016380
 PrefabInstance:
   m_ObjectHideFlags: 0
