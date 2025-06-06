@@ -126,10 +126,10 @@ namespace Player
         {
             Debug.Log($"[CLIENT] Requesting all names from host (I'm player {Object.InputAuthority.PlayerId})");
 
-            foreach (var kvp in PlayerNames)
-            {
+            var copy = new List<KeyValuePair<PlayerRef, string>>(PlayerNames);
+
+            foreach (var kvp in copy)
                 RpcDistributeNameToOne(Object.InputAuthority, kvp.Key, kvp.Value);
-            }
         }
 
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
