@@ -37,9 +37,5 @@ namespace Managers.Network
             return result.Ok;
         }
 
-        public void ShutdownSession(NetworkRunner runner)
-        {
-            runner.Shutdown();
-        }
     }
 }

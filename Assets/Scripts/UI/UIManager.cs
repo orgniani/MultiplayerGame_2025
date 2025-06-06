@@ -1,10 +1,10 @@
-using Fusion;
 using Managers;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Helpers;
+using Managers.Network;
 
 namespace UI
 {
@@ -17,7 +17,6 @@ namespace UI
         [SerializeField] private TMP_Text finalWinnersText;
         [SerializeField] private TMP_Text countdownText;
 
-
         [Header("Game objects")]
         [SerializeField] private GameObject waitingForPlayersPanel;
         [SerializeField] private GameObject countdownCanvas;
@@ -25,6 +24,7 @@ namespace UI
 
         [Header("Buttons")]
         [SerializeField] private Button menuButton;
+        [SerializeField] private Button quitButton;
 
         [Header("Main menu build index")]
         [SerializeField] private int mainMenuBuildIndex = 0;
@@ -36,9 +36,13 @@ namespace UI
         private UITimer _uiTimer;
         private UIRacePositions _uiRacePositions;
 
+        private bool _unlockedWithEsc = false;
+
         private void OnEnable()
         {
             menuButton.onClick.AddListener(ReturnToMainMenu);
+            quitButton.onClick.AddListener(QuitGame);
+
             gameOverCanvas.SetActive(false);
             waitingForPlayersPanel.SetActive(true);
             countdownCanvas.SetActive(false);
@@ -52,6 +56,7 @@ namespace UI
         private void OnDisable()
         {
             menuButton.onClick.RemoveListener(ReturnToMainMenu);
+            quitButton.onClick.RemoveListener(QuitGame);
 
             if (NetworkManager.Instance)
                 NetworkManager.Instance.OnDisconnected -= TriggerGameOver;
@@ -89,6 +94,14 @@ namespace UI
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                CursorLocker.Unlock();
+                _unlockedWithEsc = true;
+            }
+
+            TryRelockCursorOnClick();
+
             if (_uiTimer == null || _uiRacePositions == null)
                 return;
 
@@ -154,5 +167,36 @@ namespace UI
             countdownCanvas.gameObject.SetActive(false);
         }
 
+        private void TryRelockCursorOnClick()
+        {
+            if (_unlockedWithEsc && Input.GetMouseButtonDown(0))
+            {
+                if (!IsPointerOverButton(quitButton) && !IsPointerOverButton(menuButton))
+                {
+                    CursorLocker.Lock();
+                    _unlockedWithEsc = false;
+                }
+            }
+        }
+
+        private bool IsPointerOverButton(Button button)
+        {
+            if (button == null || button.gameObject == null)
+                return false;
+
+            RectTransform rectTransform = button.GetComponent<RectTransform>();
+            if (rectTransform == null) return false;
+
+            return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, null);
+        }
+
+        private void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
+        }
     }
 }

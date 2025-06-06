@@ -44,14 +44,6 @@ namespace Managers.Network
             }
         }
 
-        public NetworkPlayerSetup GetPlayerSetup(PlayerRef playerRef)
-        {
-            if (_spawnedPlayers.TryGetValue(playerRef, out var obj))
-                return obj.GetComponent<NetworkPlayerSetup>();
-
-            return null;
-        }
-
         public void ClearAll()
         {
             _spawnedPlayers.Clear();

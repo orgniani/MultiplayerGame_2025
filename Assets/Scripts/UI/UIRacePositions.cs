@@ -2,7 +2,9 @@ using Fusion;
 using Managers;
 using System.Text;
 using TMPro;
+using Managers.Network;
 using UnityEngine;
+using Player;
 
 namespace UI
 {
@@ -66,6 +68,14 @@ namespace UI
 
         private string GetPlayerName(PlayerRef player)
         {
+            if (NetworkPlayerSetup.PlayerNames.TryGetValue(player, out var name))
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                    return name;
+                else
+                    return "Player_" + player.PlayerId;
+            }
+
             return "Player_" + player.PlayerId;
         }
     }

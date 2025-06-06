@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using Managers.Network;
 using Fusion;
 using System.Collections;
+using TMPro;
+using Player;
 
 namespace UI
 {
@@ -12,6 +14,7 @@ namespace UI
         [SerializeField] private Button joinButton;
         [SerializeField] private Button quitButton;
         [SerializeField] private GameObject loadingPanel;
+        [SerializeField] private TMP_InputField usernameInputField;
 
         [Header("Build Index of Game Scene")]
         [SerializeField] private int raceSceneBuildIndex = 1;
@@ -22,13 +25,15 @@ namespace UI
         private void Start()
         {
             _sessionHandler = new NetworkSessionHandler();
-            joinButton.onClick.AddListener(() => StartCoroutine(StartGameCoroutine()));
+            joinButton.onClick.AddListener(OnJoinClicked);
             quitButton.onClick.AddListener(QuitGame);
+
+            usernameInputField.characterLimit = 16;
         }
 
         private void OnDisable()
         {
-            joinButton.onClick.RemoveListener(() => StartCoroutine(StartGameCoroutine()));
+            joinButton.onClick.RemoveListener(OnJoinClicked);
             quitButton.onClick.RemoveListener(QuitGame);
         }
 
@@ -39,6 +44,14 @@ namespace UI
 #else
     Application.Quit();
 #endif
+        }
+
+        private void OnJoinClicked()
+        {
+            var username = usernameInputField.text.Trim();
+
+            PlayerInfo.PlayerName = username;
+            StartCoroutine(StartGameCoroutine());
         }
 
         private IEnumerator StartGameCoroutine()

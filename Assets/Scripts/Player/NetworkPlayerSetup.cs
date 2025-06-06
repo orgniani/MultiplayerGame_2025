@@ -4,6 +4,7 @@ using Fusion;
 using Cameras;
 using Inputs;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Player
 {
@@ -12,7 +13,7 @@ namespace Player
     [RequireComponent(typeof(NetworkPlayerAnimation))]
     [RequireComponent(typeof(CharacterController))]
     public class NetworkPlayerSetup : NetworkBehaviour
-    {
+    {   
         [Header("Camera Follow Target")]
         [SerializeField] private Transform cameraTarget;
 
@@ -27,19 +28,34 @@ namespace Player
         private CameraTracker _cameraTracker;
 
         private GameOverManager _gameOverManager;
+        [Networked] public NetworkString<_16> PlayerName { get; set; }
+
+        public static readonly Dictionary<PlayerRef, NetworkPlayerSetup> PlayersByRef = new();
+        public static readonly Dictionary<PlayerRef, string> PlayerNames = new();
 
         public Transform GetCameraTarget() => cameraTarget;
         public CameraTracker GetCameraTracker() => _cameraTracker;
 
         public override void Spawned()
         {
-            if (!Object.HasInputAuthority)
-                return;
+            PlayersByRef[Object.InputAuthority] = this;
 
-            _cameraTracker = FindAnyObjectByType<CameraTracker>();
-            _cameraTracker.SetFollowTarget(cameraTarget);
+            if (Object.HasInputAuthority)
+            {
+                RpcSubmitNameToHost(PlayerInfo.PlayerName);
 
-            NetworkManager.Instance.RegisterLocalPlayerInput(this);
+                _cameraTracker = FindAnyObjectByType<CameraTracker>();
+                _cameraTracker.SetFollowTarget(cameraTarget);
+
+                NetworkManager.Instance.RegisterLocalPlayerInput(this);
+
+                RpcRequestAllNamesFromHost();
+            }
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            PlayersByRef.Remove(Object.InputAuthority);
         }
 
         private void Awake()
@@ -54,7 +70,7 @@ namespace Player
         {
             while (_gameOverManager == null)
             {
-                _gameOverManager = NetworkManager.Instance.GetGameOverManager();
+                _gameOverManager = NetworkManager.Instance.GameOverManager;
                 yield return null;
             }
         }
@@ -105,20 +121,41 @@ namespace Player
             return lookDirection.normalized;
         }
 
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-        public void RpcRequestDespawnRelay()
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RpcRequestAllNamesFromHost()
         {
-            RpcPerformDespawn();
+            Debug.Log($"[CLIENT] Requesting all names from host (I'm player {Object.InputAuthority.PlayerId})");
+
+            foreach (var kvp in PlayerNames)
+            {
+                RpcDistributeNameToOne(Object.InputAuthority, kvp.Key, kvp.Value);
+            }
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
-        private void RpcPerformDespawn()
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RpcSubmitNameToHost(string name)
         {
-            Debug.Log("Performing despawn on ALL");
-            HideVisuals();
+            Debug.Log($"[HOST] Received name '{name}' from player {Object.InputAuthority.PlayerId}");
 
-            if (HasStateAuthority)
-                Runner.Despawn(Object);
+            PlayerNames[Object.InputAuthority] = name;
+            RpcDistributeName(Object.InputAuthority, name);
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private void RpcDistributeName(PlayerRef playerRef, string name)
+        {
+            Debug.Log($"[ALL] Setting name for PlayerRef {playerRef.PlayerId}: {name}");
+            PlayerNames[playerRef] = name;
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private void RpcDistributeNameToOne(PlayerRef targetPlayer, PlayerRef nameOwner, string name)
+        {
+            if (Runner.LocalPlayer != targetPlayer)
+                return;
+
+            Debug.Log($"[LateJoiner] Received name for Player {nameOwner.PlayerId}: {name}");
+            PlayerNames[nameOwner] = name;
         }
 
         public void HideVisuals()

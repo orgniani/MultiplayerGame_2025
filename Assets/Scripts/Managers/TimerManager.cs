@@ -7,7 +7,6 @@ namespace Managers
 {
     public class TimerManager : NetworkBehaviour
     {
-        //TODO: Do not hardcode time
         [Networked] public float RemainingTime { get; private set; } = 120f;
         [Networked] public bool TimerRunning { get; private set; } = false;
 
